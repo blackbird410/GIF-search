@@ -25,40 +25,38 @@ const displayContent = () => {
 const fetchImage = () => {
   const img = document.querySelector("img");
   const search = document.querySelector("input");
-  if (img && search.value) {
-    fetch(
-      `https://api.giphy.com/v1/gifs/translate?api_key=${apiKey}&s=${search.value}`,
-      { mode: "cors" },
-    )
-      .then((response) => {
-        if (!response.ok) {
-          let actualError = "";
-          switch (response.status) {
-            case 401:
-              actualError = "API key incorrect";
-              break;
-            case 404:
-              actualError = "Network error";
-              break;
-            default:
-              actualError = "Network response was not OK";
-              break;
-          }
-          throw new Error(actualError);
+  let q = search.value ? search.value : "no input";
+  fetch(`https://api.giphy.com/v1/gifs/translate?api_key=${apiKey}&s=${q}`, {
+    mode: "cors",
+  })
+    .then((response) => {
+      if (!response.ok) {
+        let actualError = "";
+        switch (response.status) {
+          case 401:
+            actualError = "API key incorrect";
+            break;
+          case 404:
+            actualError = "Network error";
+            break;
+          default:
+            actualError = "Network response was not OK";
+            break;
         }
+        throw new Error(actualError);
+      }
 
-        return response.json();
-      })
-      .then((response) => {
-        if (!response.data) throw new Error("Image not found");
-        img.src = response.data.images.original.url;
-        document.querySelector("span").textContent = "";
-      })
-      .catch((error) => {
-        console.error(error);
-        document.querySelector("span").textContent = error.message;
-      });
-  }
+      return response.json();
+    })
+    .then((response) => {
+      if (!response.data) throw new Error("Image not found");
+      img.src = response.data.images.original.url;
+      document.querySelector("span").textContent = "";
+    })
+    .catch((error) => {
+      console.error(error);
+      document.querySelector("span").textContent = error.message;
+    });
 };
 
 displayContent();
