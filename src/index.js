@@ -7,6 +7,7 @@ const displayContent = () => {
   const img = document.createElement("img");
   const search = document.createElement("input");
   const fetchBtn = document.createElement("div");
+  const error = document.createElement("span");
 
   main.className = "main";
   search.placeholder = "image here...";
@@ -17,6 +18,7 @@ const displayContent = () => {
   main.appendChild(img);
   main.appendChild(search);
   main.appendChild(fetchBtn);
+  main.appendChild(error);
   document.body.appendChild(main);
 };
 
@@ -29,13 +31,32 @@ const fetchImage = () => {
       { mode: "cors" },
     )
       .then((response) => {
+        if (!response.ok) {
+          let actualError = "";
+          switch (response.status) {
+            case 401:
+              actualError = "API key incorrect";
+              break;
+            case 404:
+              actualError = "Network error";
+              break;
+            default:
+              actualError = "Network response was not OK";
+              break;
+          }
+          throw new Error(actualError);
+        }
+
         return response.json();
       })
       .then((response) => {
+        if (!response.data) throw new Error("Image not found");
         img.src = response.data.images.original.url;
+        document.querySelector("span").textContent = "";
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
+        document.querySelector("span").textContent = error.message;
       });
   }
 };
